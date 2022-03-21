@@ -66,7 +66,8 @@ def depth_first_search(problem):
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    print("Start:", problem.get_start_state().state)
+    # util.raiseNotDefined()
 
 
 def breadth_first_search(problem):
@@ -74,7 +75,32 @@ def breadth_first_search(problem):
     Search the shallowest nodes in the search tree first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    parent = dict()
+    visited = set()
+    queue = []
+    queue.append(problem.get_start_state())
+    board = queue[0]
+    parent[board] = "end"
+
+    while queue:
+        curr = queue.pop(0)
+        visited.add(curr)
+        if problem.is_goal_state(curr):
+            break
+        for succ in problem.get_successors(curr):
+            board = succ[0]
+            move = succ[1]
+            if board not in visited:
+                parent[board] = (curr, move)
+                queue.append(board)
+    final = []
+    while parent[board] != "end":
+        final = [parent[board][1]] + final
+        board = parent[board][0]
+
+    return final
+
 
 
 def uniform_cost_search(problem):
