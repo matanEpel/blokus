@@ -49,9 +49,7 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
-
-
-def depth_first_search(problem):
+def depth_first_search(problem: SearchProblem):
     """
     Search the deepest nodes in the search tree first.
 
@@ -65,8 +63,49 @@ def depth_first_search(problem):
     print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    s = util.Stack()
+    d = {}
+    visited = set()
+
+    start = problem.get_start_state()
+    s.push(start)
+    d[start] = None
+
+    while not s.isEmpty():
+        u = s.pop()
+        #if not u in visited:
+        visited.add(u)
+        for tup in problem.get_successors(u):
+            if tup[0] in visited:
+                continue
+            a = tup[0]
+            d[a] = (u, tup[1])
+            s.push(a)
+
+            if problem.is_goal_state(a):
+                curr_state = a
+                l = []
+                while d[curr_state] != None:
+                    l.append(d[curr_state][1])
+                    curr_state = d[curr_state][0]
+                return l[::-1]
+
+    """
+    DFS(G,v)   ( v is the vertex where the search starts )
+         Stack S := {};   ( start with an empty stack )
+         for each vertex u, set visited[u] := false;
+         push S, v;
+         while (S is not empty) do
+            u := pop S;
+            if (not visited[u]) then
+               visited[u] := true;
+               for each unvisited neighbour w of u
+                  push S, w;
+            end if
+         end while
+      END DFS()
+    """
 
 
 def breadth_first_search(problem):
@@ -99,7 +138,6 @@ def a_star_search(problem, heuristic=null_heuristic):
     """
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
-
 
 
 # Abbreviations
