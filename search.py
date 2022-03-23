@@ -103,6 +103,7 @@ def breadth_first_search(problem):
     visited = set()
     queue = []
     queue.append(problem.get_start_state())
+    curr = problem.get_start_state()
     board = queue[0]
     parent[board] = "end"
 
@@ -118,9 +119,9 @@ def breadth_first_search(problem):
                 parent[board] = (curr, move)
                 queue.append(board)
     final = []
-    while parent[board] != "end":
-        final = [parent[board][1]] + final
-        board = parent[board][0]
+    while parent[curr] != "end":
+        final = [parent[curr][1]] + final
+        curr = parent[curr][0]
 
     return final
 
