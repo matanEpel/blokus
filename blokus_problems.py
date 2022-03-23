@@ -1,6 +1,7 @@
 from board import Board
 from search import SearchProblem, ucs
 import util
+import math
 
 
 class BlokusFillProblem(SearchProblem):
@@ -114,21 +115,57 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
+    max_int = state.board_w * state.board_h #  a number that can be used as max int to the distances in the board
     top_left_corner = (0, 0)
     top_right_corner = (0, state.board_w - 1)
     bot_left_corner = (state.board_h - 1, 0)
     bot_right_corner = (state.board_h - 1, state.board_w - 1)
 
-    top_left_min_dist = -1
-    top_right_min_dist = -1
-    bot_left_min_dist = -1
-    bot_right_min_dist = -1
+    top_left_min_dist = max_int
+    top_right_min_dist = max_int
+    bot_left_min_dist = max_int
+    bot_right_min_dist = max_int
+
+    """
+        if the corner is filled
+    """
+    if state.state[top_left_corner[0], top_left_corner[1]] != -1:
+        top_left_min_dist = 0
+    if state.state[top_right_corner[0], top_right_corner[1]] != -1:
+        top_right_min_dist = 0
+    if state.state[bot_left_corner[0], bot_left_corner[1]] != -1:
+        bot_left_min_dist = 0
+    if state.state[bot_right_corner[0], bot_right_corner[1]] != -1:
+        bot_right_min_dist = 0
 
     valid_places_list = []
     for i in range(0, state.board_w):
         for j in range(0, state.board_h):
             if state.check_tile_legal(1, i, j):
                 valid_places_list.append((i, j))
+
+    print(valid_places_list) # TODO delete this line
+
+    def distance(t1, t2):
+        return math.sqrt((t1[0] - t2[0]) ** 2 + (t1[1] - t2[1]) ** 2)
+
+    for place in valid_places_list:
+
+        if distance(place, top_left_corner) < top_left_min_dist:
+            top_left_min_dist = distance(place, top_left_corner)
+
+        if distance(place, top_right_corner) < top_right_min_dist:
+            top_right_min_dist = distance(place, top_right_corner)
+
+        if distance(place, bot_left_corner) < bot_left_min_dist:
+            bot_left_min_dist = distance(place, bot_left_corner)
+
+        if distance(place, bot_right_corner) < bot_right_min_dist:
+            bot_right_min_dist = distance(place, bot_right_corner)
+
+
+    return max([max([top_right_min_dist, top_left_min_dist, bot_right_min_dist, bot_left_min_dist]),
+                (top_right_min_dist + top_left_min_dist + bot_right_min_dist + bot_left_min_dist)/3])
 
 
 class BlokusCoverProblem(SearchProblem):
