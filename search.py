@@ -66,7 +66,33 @@ def depth_first_search(problem):
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    s = util.Stack()
+    d = {}
+    visited = set()
+
+    start = problem.get_start_state()
+    s.push(start)
+    d[start] = None
+
+    while not s.isEmpty():
+        u = s.pop()
+        # if not u in visited:
+        visited.add(u)
+        for tup in problem.get_successors(u):
+            if tup[0] in visited:
+                continue
+            a = tup[0]
+            d[a] = (u, tup[1])
+            s.push(a)
+
+            if problem.is_goal_state(a):
+                curr_state = a
+                l = []
+                while d[curr_state] != None:
+                    l.append(d[curr_state][1])
+                    curr_state = d[curr_state][0]
+                return l[::-1]
+    # util.raiseNotDefined()
 
 
 def breadth_first_search(problem):
@@ -74,36 +100,28 @@ def breadth_first_search(problem):
     Search the shallowest nodes in the search tree first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    parent = dict()
+    visited = set()
+    queue = []
+    queue.append(problem.get_start_state())
+    board = queue[0]
+    parent[board] = "end"
 
-def uniform_cost_search(problem):
-    """
-    Search the node of least total cost first.
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    while queue:
+        curr = queue.pop(0)
+        visited.add(curr)
+        if problem.is_goal_state(curr):
+            break
+        for succ in problem.get_successors(curr):
+            board = succ[0]
+            move = succ[1]
+            if board not in visited:
+                parent[board] = (curr, move)
+                queue.append(board)
+    final = []
+    while parent[board] != "end":
+        final = [parent[board][1]] + final
+        board = parent[board][0]
 
-
-def null_heuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
-    return 0
-
-
-def a_star_search(problem, heuristic=null_heuristic):
-    """
-    Search the node that has the lowest combined cost and heuristic first.
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
-
-
-# Abbreviations
-bfs = breadth_first_search
-dfs = depth_first_search
-astar = a_star_search
-ucs = uniform_cost_search
+    return final
