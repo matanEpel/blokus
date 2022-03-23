@@ -142,10 +142,10 @@ def uniform_f_cost_search(problem, f):
 
         cost = curr[3]
         for succ in problem.get_successors(curr[1]):
-            board = succ[0]
+            state = succ[0]
             move = succ[1]
-            queue.push(node + [(id(board), board, move, cost + f(move, curr[1]))],
-                       cost + f(move, curr[1]))
+            queue.push(node + [(id(state), state, move, cost + f(move, state))],
+                       cost + f(move, state))
 
 
 def uniform_cost_search(problem):
