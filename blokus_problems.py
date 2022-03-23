@@ -68,9 +68,10 @@ class BlokusCornersProblem(SearchProblem):
 
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
-        value = (state.state[0, 0] != -1) and (state.state[state.board_h - 1, 0] != -1) and (
-                    state.state[0, state.board_w - 1] != -1) and (
-                            state.state[state.board_h - 1, state.board_w - 1] != -1)
+        value = state.state[0, 0] != -1 and state.state[state.board_h - 1, 0] != -1 and state.state[0, state.board_w - 1] != -1 and state.state[state.board_h - 1, state.board_w - 1] != -1
+
+        if (value):
+            print("hey")
         return value
 
     def get_successors(self, state):
@@ -148,7 +149,7 @@ class BlokusCoverProblem(SearchProblem):
         "*** YOUR CODE HERE ***"
         for tup in self.targets:
             i, j = tup
-            if state.state[j, i] == -1:
+            if state.state[i, j] == -1:
                 return False
 
         return True
