@@ -66,7 +66,32 @@ def depth_first_search(problem):
     print("Start's successors:", problem.get_successors(problem.get_start_state()))
     """
     "*** YOUR CODE HERE ***"
-    print("Start:", problem.get_start_state().state)
+    s = util.Stack()
+    d = {}
+    visited = set()
+
+    start = problem.get_start_state()
+    s.push(start)
+    d[start] = None
+
+    while not s.isEmpty():
+        u = s.pop()
+        # if not u in visited:
+        visited.add(u)
+        for tup in problem.get_successors(u):
+            if tup[0] in visited:
+                continue
+            a = tup[0]
+            d[a] = (u, tup[1])
+            s.push(a)
+
+            if problem.is_goal_state(a):
+                curr_state = a
+                l = []
+                while d[curr_state] != None:
+                    l.append(d[curr_state][1])
+                    curr_state = d[curr_state][0]
+                return l[::-1]
     # util.raiseNotDefined()
 
 
