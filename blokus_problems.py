@@ -49,6 +49,7 @@ class BlokusFillProblem(SearchProblem):
         """
         return len(actions)
 
+
 #####################################################
 # This portion is incomplete.  Time to write code!  #
 #####################################################
@@ -67,7 +68,9 @@ class BlokusCornersProblem(SearchProblem):
 
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
-        value = state.state[0, 0] != -1 and state.state[state.board_h - 1,0] != -1 and state.state[0,state.board_w - 1] != -1 and state.state[state.board_h - 1, state.board_w - 1] != -1
+        value = (state.state[0, 0] != -1) and (state.state[state.board_h - 1, 0] != -1) and (
+                    state.state[0, state.board_w - 1] != -1) and (
+                            state.state[state.board_h - 1, state.board_w - 1] != -1)
         return value
 
     def get_successors(self, state):
@@ -111,10 +114,10 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    top_left_corner = (0,0)
-    top_right_corner = (0, state.board_w-1)
-    bot_left_corner = (state.board_h-1, 0)
-    bot_right_corner = (state.board_h-1, state.board_w-1)
+    top_left_corner = (0, 0)
+    top_right_corner = (0, state.board_w - 1)
+    bot_left_corner = (state.board_h - 1, 0)
+    bot_right_corner = (state.board_h - 1, state.board_w - 1)
 
     top_left_min_dist = -1
     top_right_min_dist = -1
@@ -125,10 +128,7 @@ def blokus_corners_heuristic(state, problem):
     for i in range(0, state.board_w):
         for j in range(0, state.board_h):
             if state.check_tile_legal(1, i, j):
-                valid_places_list.append((i,j))
-
-
-
+                valid_places_list.append((i, j))
 
 
 class BlokusCoverProblem(SearchProblem):
@@ -148,7 +148,7 @@ class BlokusCoverProblem(SearchProblem):
         "*** YOUR CODE HERE ***"
         for tup in self.targets:
             i, j = tup
-            if state.state[i, j] == -1:
+            if state.state[j, i] == -1:
                 return False
 
         return True
@@ -227,7 +227,6 @@ class ClosestLocationSearch:
         util.raiseNotDefined()
 
 
-
 class MiniContestSearch:
     """
     Implement your contest entry here
@@ -246,4 +245,3 @@ class MiniContestSearch:
     def solve(self):
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
-
