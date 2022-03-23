@@ -69,7 +69,8 @@ class BlokusCornersProblem(SearchProblem):
 
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
-        value = state.state[0, 0] != -1 and state.state[state.board_h - 1, 0] != -1 and state.state[0, state.board_w - 1] != -1 and state.state[state.board_h - 1, state.board_w - 1] != -1
+        value = state.state[0, 0] != -1 and state.state[state.board_h - 1, 0] != -1 and state.state[
+            0, state.board_w - 1] != -1 and state.state[state.board_h - 1, state.board_w - 1] != -1
 
         if (value):
             print("hey")
@@ -116,7 +117,7 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    max_int = state.board_w * state.board_h #  a number that can be used as max int to the distances in the board
+    max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
     top_left_corner = (0, 0)
     top_right_corner = (0, state.board_w - 1)
     bot_left_corner = (state.board_h - 1, 0)
@@ -142,10 +143,10 @@ def blokus_corners_heuristic(state, problem):
     valid_places_list = []
     for i in range(0, state.board_w):
         for j in range(0, state.board_h):
-            if state.check_tile_legal(1, i, j):
-                valid_places_list.append((i, j))
+            if state.state[i, j] != -1:
+                valid_places_list.append((j, i))
 
-    print(valid_places_list) # TODO delete this line
+    # print(valid_places_list)  # TODO delete this line
 
     def distance(t1, t2):
         return math.sqrt((t1[0] - t2[0]) ** 2 + (t1[1] - t2[1]) ** 2)
@@ -163,10 +164,11 @@ def blokus_corners_heuristic(state, problem):
 
         if distance(place, bot_right_corner) < bot_right_min_dist:
             bot_right_min_dist = distance(place, bot_right_corner)
+    a = max([max([top_right_min_dist, top_left_min_dist, bot_right_min_dist, bot_left_min_dist]),
+                (top_right_min_dist + top_left_min_dist + bot_right_min_dist + bot_left_min_dist) / 3])
+    # print(a)
 
-
-    return max([max([top_right_min_dist, top_left_min_dist, bot_right_min_dist, bot_left_min_dist]),
-                (top_right_min_dist + top_left_min_dist + bot_right_min_dist + bot_left_min_dist)/3])
+    return a
 
 
 class BlokusCoverProblem(SearchProblem):
