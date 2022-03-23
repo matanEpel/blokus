@@ -158,7 +158,11 @@ class BlokusCoverProblem(SearchProblem):
         be composed of legal moves
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        sum = 0
+        for move in actions:
+            sum += move.piece.get_num_tiles()
+
+        return sum
 
 
 def blokus_cover_heuristic(state, problem):
