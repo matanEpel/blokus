@@ -125,3 +125,36 @@ def breadth_first_search(problem):
         board = parent[board][0]
 
     return final
+
+
+
+def uniform_cost_search(problem):
+    """
+    Search the node of least total cost first.
+    """
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
+
+
+def null_heuristic(state, problem=None):
+    """
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem.  This heuristic is trivial.
+    """
+    return 0
+
+
+def a_star_search(problem, heuristic=null_heuristic):
+    """
+    Search the node that has the lowest combined cost and heuristic first.
+    """
+    "*** YOUR CODE HERE ***"
+    util.raiseNotDefined()
+
+
+
+# Abbreviations
+bfs = breadth_first_search
+dfs = depth_first_search
+astar = a_star_search
+ucs = uniform_cost_search
