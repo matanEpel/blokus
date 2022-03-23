@@ -49,8 +49,6 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
-
-
 def depth_first_search(problem):
     """
     Search the deepest nodes in the search tree first.
