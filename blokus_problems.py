@@ -111,12 +111,29 @@ def blokus_corners_heuristic(state, problem):
     your heuristic is *not* consistent, and probably not admissible!  On the other hand,
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    top_left_corner = (0,0)
+    top_right_corner = (0, state.board_w-1)
+    bot_left_corner = (state.board_h-1, 0)
+    bot_right_corner = (state.board_h-1, state.board_w-1)
+
+    top_left_min_dist = -1
+    top_right_min_dist = -1
+    bot_left_min_dist = -1
+    bot_right_min_dist = -1
+
+    valid_places_list = []
+    for i in range(0, state.board_w):
+        for j in range(0, state.board_h):
+            if state.check_tile_legal(1, i, j):
+                valid_places_list.append((i,j))
+
+
+
 
 
 class BlokusCoverProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.targets = targets.copy()
         self.expanded = 0
         "*** YOUR CODE HERE ***"
