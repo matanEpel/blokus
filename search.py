@@ -125,13 +125,34 @@ def breadth_first_search(problem):
     return final
 
 
+def uniform_f_cost_search(problem, f):
+    """
+        Search the node of least total cost first.
+        """
+    "*** YOUR CODE HERE ***"
+    queue = util.PriorityQueue()
+    queue.push([(id(problem.get_start_state()), problem.get_start_state(), "start", 0)], 0)
+
+    while not queue.isEmpty():
+        node = queue.pop()
+        curr = node[-1]
+
+        if problem.is_goal_state(curr[1]):
+            return [i[2] for i in node[1:]]
+
+        cost = curr[3]
+        for succ in problem.get_successors(curr[1]):
+            board = succ[0]
+            move = succ[1]
+            queue.push(node + [(id(board), board, move, cost + f(move, curr[1]))],
+                       cost + f(move, curr[1]))
+
 
 def uniform_cost_search(problem):
-    """
-    Search the node of least total cost first.
-    """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def cost(move, state):
+        return problem.get_cost_of_actions([move])
+
+    return uniform_f_cost_search(problem, cost)
 
 
 def null_heuristic(state, problem=None):
@@ -147,8 +168,11 @@ def a_star_search(problem, heuristic=null_heuristic):
     Search the node that has the lowest combined cost and heuristic first.
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    def astar_cost(move, state):
+        return problem.get_cost_of_actions([move]) + heuristic(state, problem)
+
+    return uniform_f_cost_search(problem, astar_cost)
 
 
 # Abbreviations
