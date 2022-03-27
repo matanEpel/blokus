@@ -320,10 +320,10 @@ class ClosestLocationSearch:
         d = {}
         visited = set()
         start = self.get_start_state()
-        s.push((start, []))
+        s.push(start)
         d[start] = None
         while not s.isEmpty():
-            u, reached = s.pop()
+            u = s.pop()
             # if not u in visited:
             visited.add(u)
             for tup in self.get_successors(u, remaining_targets):
@@ -333,7 +333,7 @@ class ClosestLocationSearch:
                 d[a] = (u, tup[1])
 
                 reached = self.reached_a_target(a, remaining_targets)
-                s.push((a, reached))
+                s.push(a)
 
                 if reached:
                     temp_reached = [targ for targ in remaining_targets if targ not in reached]
