@@ -97,15 +97,14 @@ class BlokusCornersProblem(SearchProblem):
         sum = 0
         for move in actions:
             sum += move.piece.get_num_tiles()
-
         return sum
 
 
 def new_min_dists(state, locations, max_int):
-    points = np.asarray(np.where(np.array(state.state) != -1))
+    points = np.asarray(np.where(state.state != -1))
     dists = [max_int] * len(locations)
     for i in range(len(locations)):
-        dist_2 = np.sum(np.array([(points[0] - locations[i][0]) ** 2, (points[1] - locations[i][1]) ** 2]), axis=0)
+        dist_2 = np.sum([(points[0] - locations[i][0]) ** 2, (points[1] - locations[i][1]) ** 2], axis=0)
         closest = points[:, np.argmin(dist_2)]
         dists[i] = math.sqrt((closest[0] - locations[i][0]) ** 2 + (closest[1] - locations[i][1]) ** 2)
     return dists
