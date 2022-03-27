@@ -103,8 +103,31 @@ class BlokusCornersProblem(SearchProblem):
             sum += move.piece.get_num_tiles()
 
         return sum
+
+
 def distance(t1, t2):
     return math.sqrt((t1[0] - t2[0]) ** 2 + (t1[1] - t2[1]) ** 2)
+
+
+def min_dists(state, locations, max_int):
+    # if the corner is filled:
+    dists = [max_int] * len(locations)
+    for i in range(len(locations)):
+        if state.state[locations[i][0], locations[i][1]] != -1:
+            dists[i] = 0
+
+    valid_places_list = []
+    for i in range(0, state.board_w):
+        for j in range(0, state.board_h):
+            if state.state[i, j] != -1:
+                valid_places_list.append((j, i))
+
+    for place in valid_places_list:
+        for i in range(len(locations)):
+            if distance(place, locations[i]) < dists[i]:
+                dists[i] = distance(place, locations[i])
+    return dists
+
 
 def blokus_corners_heuristic(state, problem):
     """
@@ -120,25 +143,9 @@ def blokus_corners_heuristic(state, problem):
     """
     max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
     locations = [(0, 0), (0, state.board_w - 1), (state.board_h - 1, 0), (state.board_h - 1, state.board_w - 1)]
-    dists = [max_int] * 4
+    dists = min_dists(state, locations, max_int)
 
-    # if the corner is filled:
-    for i in range(4):
-        if state.state[locations[i][0], locations[i][1]] != -1:
-            dists[i] = 0
-
-    valid_places_list = []
-    for i in range(0, state.board_w):
-        for j in range(0, state.board_h):
-            if state.state[i, j] != -1:
-                valid_places_list.append((j, i))
-
-    for place in valid_places_list:
-        for i in range(4):
-            if distance(place, locations[i]) < dists[i]:
-                dists[i] = distance(place, locations[i])
-
-    a = sum(dists)/2
+    a = sum(dists) / 2
 
     return a
 
@@ -196,7 +203,13 @@ class BlokusCoverProblem(SearchProblem):
 
 def blokus_cover_heuristic(state, problem):
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
+    locations = problem.targets
+    dists = min_dists(state, locations, max_int)
+
+    a = max(dists)
+
+    return a
 
 
 class ClosestLocationSearch:
