@@ -51,13 +51,12 @@ class BlokusFillProblem(SearchProblem):
         return len(actions)
 
 
-#####################################################
-# This portion is incomplete.  Time to write code!  #
-#####################################################
-
 class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.targets = [(0, 0), (0, board_w - 1), (board_h - 1, 0), (board_h - 1, board_w - 1)]
+        if starting_point in self.targets:
+            self.targets.remove(starting_point)
         self.expanded = 0
         "*** YOUR CODE HERE ***"
 
@@ -69,11 +68,7 @@ class BlokusCornersProblem(SearchProblem):
 
     def is_goal_state(self, state):
         "*** YOUR CODE HERE ***"
-        value = state.state[0, 0] != -1 and state.state[state.board_h - 1, 0] != -1 and state.state[
-            0, state.board_w - 1] != -1 and state.state[state.board_h - 1, state.board_w - 1] != -1
-
-        if (value):
-            print("hey")
+        value = all([state.state[loc[0], loc[1]] != -1 for loc in self.targets])
         return value
 
     def get_successors(self, state):
@@ -142,7 +137,7 @@ def blokus_corners_heuristic(state, problem):
     inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
     """
     max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
-    locations = [(0, 0), (0, state.board_w - 1), (state.board_h - 1, 0), (state.board_h - 1, state.board_w - 1)]
+    locations = problem.targets
     dists = min_dists(state, locations, max_int)
 
     a = sum(dists) / 2
