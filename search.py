@@ -103,27 +103,41 @@ def breadth_first_search(problem):
     return lookup(s, problem)
 
 
+# TODO: fix!!!
 def uniform_f_cost_search(problem, f):
     """
         Search the node of least total cost first.
         """
     "*** YOUR CODE HERE ***"
     queue = util.PriorityQueue()
-    queue.push([(id(problem.get_start_state()), problem.get_start_state(), "start", 0)], 0)
+    visited = set()
+    in_queue = {}
+    father = {id(problem.get_start_state()): None}
+    queue.push((id(problem.get_start_state()), problem.get_start_state(), "start", 0), 0)
 
     while not queue.isEmpty():
         node = queue.pop()
-        curr = node[-1]
-
-        if problem.is_goal_state(curr[1]):
-            return [i[2] for i in node[1:]]
-
-        cost = curr[3]
-        for succ in problem.get_successors(curr[1]):
+        if id(node[1]) in visited:
+            continue
+        if problem.is_goal_state(node[1]):
+            l = []
+            while node[2] != "start":
+                move = node[2]
+                l.append(move)
+                node = father[id(node[1])]
+            return l[::-1]
+        visited.add(id(node[1]))
+        cost = node[3]
+        for succ in problem.get_successors(node[1]):
             state = succ[0]
             move = succ[1]
-            queue.push(node + [(id(state), state, move, cost + f(move, state))],
-                       cost + f(move, state))
+            new_cost = cost + f(move, state)
+            if ((id(state) not in visited) and (state not in in_queue)) or (id(state) in in_queue and new_cost < in_queue[id(state)]):
+                father[id(state)] = node
+                queue.push((id(state), state, move, new_cost),
+                           new_cost)
+                in_queue[id(state)] = new_cost
+        print(cost)
 
 
 def uniform_cost_search(problem):
