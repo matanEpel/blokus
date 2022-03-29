@@ -49,6 +49,32 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+def lookup(s, problem):
+    d = {}
+    visited = set()
+    start = problem.get_start_state()
+    s.push(start)
+    visited.add(start)
+    d[start] = None
+
+    while not s.isEmpty():
+        u = s.pop()
+        if problem.is_goal_state(u):
+            curr_state = u
+            l = []
+            while d[curr_state] != None:
+                l.append(d[curr_state][1])
+                curr_state = d[curr_state][0]
+            return l[::-1]
+        for tup in problem.get_successors(u):
+            if tup[0] in visited:
+                continue
+            a = tup[0]
+            d[a] = (u, tup[1])
+            s.push(a)
+            visited.add(a)
+
+
 def depth_first_search(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -65,32 +91,7 @@ def depth_first_search(problem):
     """
     "*** YOUR CODE HERE ***"
     s = util.Stack()
-    d = {}
-    visited = set()
-
-    start = problem.get_start_state()
-    s.push(start)
-    d[start] = None
-
-    while not s.isEmpty():
-        u = s.pop()
-        # if not u in visited:
-        visited.add(u)
-        for tup in problem.get_successors(u):
-            if tup[0] in visited:
-                continue
-            a = tup[0]
-            d[a] = (u, tup[1])
-            s.push(a)
-
-            if problem.is_goal_state(a):
-                curr_state = a
-                l = []
-                while d[curr_state] != None:
-                    l.append(d[curr_state][1])
-                    curr_state = d[curr_state][0]
-                return l[::-1]
-    # util.raiseNotDefined()
+    return lookup(s, problem)
 
 
 def breadth_first_search(problem):
@@ -98,32 +99,8 @@ def breadth_first_search(problem):
     Search the shallowest nodes in the search tree first.
     """
     "*** YOUR CODE HERE ***"
-
-    parent = dict()
-    visited = set()
-    queue = []
-    queue.append(problem.get_start_state())
-    curr = problem.get_start_state()
-    board = queue[0]
-    parent[board] = "end"
-
-    while queue:
-        curr = queue.pop(0)
-        visited.add(curr)
-        if problem.is_goal_state(curr):
-            break
-        for succ in problem.get_successors(curr):
-            board = succ[0]
-            move = succ[1]
-            if board not in visited:
-                parent[board] = (curr, move)
-                queue.append(board)
-    final = []
-    while parent[curr] != "end":
-        final = [parent[curr][1]] + final
-        curr = parent[curr][0]
-
-    return final
+    s = util.Queue()
+    return lookup(s, problem)
 
 
 def uniform_f_cost_search(problem, f):
