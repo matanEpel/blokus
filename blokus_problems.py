@@ -124,7 +124,8 @@ def blokus_corners_heuristic(state, problem):
     the heuristic is to take the sum of minimum distances to the corners
     and dividing it by two. It is admissible because we can write a proof
     that at most half of the moves directly to a corner 
-    can get us closer to another 2 corners. so 1/2 * 1/4 + 1/2 *3/4 = 1/2
+    can get us closer to another 2 corners. so 1/2 * 1/4 + 1/2 *3/4 = 1/2.
+    and it is consistent because of the same reason - if 
     """
     a = sum(dists) / 2
 
@@ -136,7 +137,6 @@ class BlokusCoverProblem(SearchProblem):
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.targets = targets.copy()
         self.expanded = 0
-        "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
         """
@@ -145,7 +145,11 @@ class BlokusCoverProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
+        """
+        we have reached the goal if all the targets are filled
+        :param state: the current state
+        :return: whether it is a goal state
+        """
         for tup in self.targets:
             i, j = tup
             if state.state[i, j] == -1:
@@ -155,26 +159,19 @@ class BlokusCoverProblem(SearchProblem):
 
     def get_successors(self, state):
         """
-        state: Search state
-
-        For a given state, this should return a list of triples,
-        (successor, action, stepCost), where 'successor' is a
-        successor to the current state, 'action' is the action
-        required to get there, and 'stepCost' is the incremental
-        cost of expanding to that successor
+        we used the same function as yours
+        :param state: the curr state
+        :return: all the successors
         """
-        # Note that for the search problem, there is only one player - #0
         self.expanded = self.expanded + 1
         return [(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)]
 
     def get_cost_of_actions(self, actions):
         """
-        actions: A list of actions to take
-
-        This method returns the total cost of a particular sequence of actions.  The sequence must
-        be composed of legal moves
+        the cost of all the actions in a list of actions
+        :param actions: the list of actions
+        :return: the cost
         """
-        "*** YOUR CODE HERE ***"
         sum = 0
         for move in actions:
             sum += move.piece.get_num_tiles()
@@ -183,17 +180,33 @@ class BlokusCoverProblem(SearchProblem):
 
 
 def blokus_cover_heuristic(state, problem):
-    "*** YOUR CODE HERE ***"
+    """
+    the cover problem heuristic.
+    :param state: the current state
+    :param problem: the problem
+    :return: the heuristic guess
+    """
     max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
     locations = problem.targets
     dists = new_min_dists(state, locations, max_int)
-
+    """
+    the heuristic is to take the max of minimum distances to the corners.
+    It is admissible because we can't get to a corner in less than the min distance to it
+    and it is obviously consistent because a real step can get us closer at most the 
+    straight-line-distance
+    """
     a = max(dists)
 
     return a
 
 
 def distance(t1, t2):
+    """
+    a distance from point to point
+    :param t1: the first point
+    :param t2: the second point
+    :return: the distance
+    """
     return math.sqrt((t1[0] - t2[0]) ** 2 + (t1[1] - t2[1]) ** 2)
 
 
