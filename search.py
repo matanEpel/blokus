@@ -50,8 +50,14 @@ class SearchProblem:
 
 
 def lookup(s, problem):
-    d = {}
-    visited = set()
+    """
+    for Dfs and Bfs
+    :param s: the queue/stack
+    :param problem: the problem
+    :return: the solution
+    """
+    d = {}  # the father of each node
+    visited = set()  # a set of the visited nodes
     start = problem.get_start_state()
     s.push(start)
     visited.add(start)
@@ -59,13 +65,17 @@ def lookup(s, problem):
 
     while not s.isEmpty():
         u = s.pop()
+
+        # creating the moves solution
         if problem.is_goal_state(u):
             curr_state = u
-            l = []
-            while d[curr_state] != None:
-                l.append(d[curr_state][1])
+            moves_list = []
+            while d[curr_state] is not None:
+                moves_list.append(d[curr_state][1])
                 curr_state = d[curr_state][0]
-            return l[::-1]
+            return moves_list[::-1]
+
+        # adding each child to the queue/stack
         for tup in problem.get_successors(u):
             if tup[0] in visited:
                 continue
@@ -77,72 +87,90 @@ def lookup(s, problem):
 
 def depth_first_search(problem):
     """
-    Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches
-    the goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-	print("Start:", problem.get_start_state().state)
-    print("Is the start a goal?", problem.is_goal_state(problem.get_start_state()))
-    print("Start's successors:", problem.get_successors(problem.get_start_state()))
+    DFS for the problem
+    :param problem: the problem
+    :return: the solution
     """
-    "*** YOUR CODE HERE ***"
-    s = util.Stack()
+    s = util.Stack()  # in DFS we use stack
     return lookup(s, problem)
 
 
 def breadth_first_search(problem):
     """
-    Search the shallowest nodes in the search tree first.
+    BFS for the problem
+    :param problem: the problem
+    :return: the solution
     """
-    "*** YOUR CODE HERE ***"
-    s = util.Queue()
+    s = util.Queue()  # in BFS we use queue
     return lookup(s, problem)
 
 
-# TODO: fix!!!
 def uniform_f_cost_search(problem, f):
     """
-        Search the node of least total cost first.
-        """
-    "*** YOUR CODE HERE ***"
+    a general function for ucs and astar
+    :param problem: the problem
+    :param f: the cost function. returns the cost to the point,
+    and the heuristic to the point (in ucs the heuristic is 0)
+    :return: the solution
+    """
+    count = 0
+    count_expanded = 0
     queue = util.PriorityQueue()
-    visited = set()
-    in_queue = {}
-    father = {id(problem.get_start_state()): None}
-    queue.push((id(problem.get_start_state()), problem.get_start_state(), "start", 0), 0)
+    nodes = {}  # a dict that connects between state number and the state. num: state, move, father_num
+    queue.push((count, None, 0), 0)  # node_num, father_num, cost
+    nodes[0] = (problem.get_start_state(), None, None)
 
     while not queue.isEmpty():
+        count_expanded += 1
         node = queue.pop()
-        if id(node[1]) in visited:
-            continue
-        if problem.is_goal_state(node[1]):
-            l = []
-            while node[2] != "start":
-                move = node[2]
-                l.append(move)
-                node = father[id(node[1])]
-            return l[::-1]
-        visited.add(id(node[1]))
-        cost = node[3]
-        for succ in problem.get_successors(node[1]):
-            state = succ[0]
-            move = succ[1]
-            new_cost = cost + f(move, state)
-            if ((id(state) not in visited) and (state not in in_queue)) or (id(state) in in_queue and new_cost < in_queue[id(state)]):
-                father[id(state)] = node
-                queue.push((id(state), state, move, new_cost),
-                           new_cost)
-                in_queue[id(state)] = new_cost
-        print(cost)
+
+        # checking if we reached a goal state:
+        if problem.is_goal_state(nodes[node[0]][0]):
+            last = node[0]
+            moves_list = []
+
+            # creating the steps for the solution:
+            while nodes[last][2] is not None:
+                state, move, new_last = nodes[last]
+                last = new_last
+                if move is None:
+                    break
+                moves_list.append(move)
+            return moves_list[::-1]
+
+        cost = node[2]
+        father_count = node[0]
+
+        # adding all the successors of the curr node:
+        for successor in problem.get_successors(nodes[node[0]][0]):
+            count += 1
+            state = successor[0]
+            move = successor[1]
+            nodes[count] = (state, move, father_count)
+            new_cost, h = f(move, state)
+            new_cost = cost + new_cost
+            # saving the father of the curr node and the cost to get to it
+            queue.push((count, father_count, new_cost),
+                       new_cost + h)
+        print(cost, count_expanded)
 
 
 def uniform_cost_search(problem):
+    """
+    UCS algorithm for finding shortest path
+    :param problem: the problem
+    :return: the solution
+    """
     def cost(move, state):
-        return problem.get_cost_of_actions([move])
+        """
+        a cost function for ucs
+        :param move: the move we have done which determines the price
+        :param state: the state, we don't need it in ucs because we don;t use heuristics
+        :return: the cost of the curr move
+        """
+
+        # we return ,0 because the heuristic is 0
+        return problem.get_cost_of_actions([move]), 0
 
     return uniform_f_cost_search(problem, cost)
 
@@ -157,12 +185,20 @@ def null_heuristic(state, problem=None):
 
 def a_star_search(problem, heuristic=null_heuristic):
     """
-    Search the node that has the lowest combined cost and heuristic first.
+    A star algorithm for finding shortest path
+    :param problem: the problem
+    :param heuristic: the heuristic
+    :return: the solution
     """
-    "*** YOUR CODE HERE ***"
 
     def astar_cost(move, state):
-        return problem.get_cost_of_actions([move]) + heuristic(state, problem)
+        """
+        a cost function for a star
+        :param move: the move we have done which determines the price
+        :param state: the state, for the heuristic function
+        :return: the cost and the heuristic
+        """
+        return problem.get_cost_of_actions([move]), heuristic(state, problem)
 
     return uniform_f_cost_search(problem, astar_cost)
 
