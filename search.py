@@ -122,7 +122,7 @@ def uniform_f_cost_search(problem, f):
 
     while not queue.isEmpty():
         count_expanded += 1
-        node = queue.pop()
+        node = queue.pop()\
 
         # checking if we reached a goal state:
         if problem.is_goal_state(nodes[node[0]][0]):
@@ -152,7 +152,7 @@ def uniform_f_cost_search(problem, f):
             # saving the father of the curr node and the cost to get to it
             queue.push((count, father_count, new_cost),
                        new_cost + h)
-        print(cost, count_expanded)
+        # print(cost, count_expanded)
 
 
 def uniform_cost_search(problem):

@@ -1,5 +1,5 @@
 from board import Board
-from search import SearchProblem, ucs
+from search import SearchProblem, ucs, astar
 import util
 import math
 import numpy as np
@@ -106,6 +106,23 @@ def new_min_dists(state, locations, max_int):
     for i in range(len(locations)):
         dist_2 = np.sum([(points[0] - locations[i][0]) ** 2, (points[1] - locations[i][1]) ** 2], axis=0)
         dists[i] = math.sqrt(np.min(dist_2))
+
+    # if one of the locations that is adjacent to the target
+    # is filled there is no solution, so we make the heuristic distance
+    # high because the actual distance is infinity
+    w, h = state.board_w, state.board_h
+    for i in range(len(locations)):
+        i, j = locations[i]
+        if state.state[i,j] == 0:
+            continue
+        if i-1 >= 0 and state.state[i-1,j] == 0:
+            return [max_int*10]
+        if i+1 < w and state.state[i+1,j] == 0:
+            return [max_int*10]
+        if j-1 >= 0 and state.state[i,j-1] == 0:
+            return [max_int*10]
+        if j+1 < h and state.state[i,j+1] == 0:
+            return [max_int*10]
     return dists
 
 
@@ -121,13 +138,19 @@ def blokus_corners_heuristic(state, problem):
     dists = new_min_dists(state, locations, max_int)
 
     """
-    the heuristic is to take the sum of minimum distances to the corners
-    and dividing it by two. It is admissible because we can write a proof
+    the heuristic is to take the max between the sum of minimum
+    distances to the corners and dividing it by two and the max distance. 
+    It is admissible because we can write a proof
     that at most half of the moves directly to a corner 
     can get us closer to another 2 corners. so 1/2 * 1/4 + 1/2 *3/4 = 1/2.
-    and it is consistent because of the same reason - if 
+    and the max distance is obviously admissible because
+    we must go at least the minimum distance to the corner.
+    
+    We must admit that the heuristic is not consistent, however we are not
+    required to supply a consistent heuristic AND we are in a tree search
+    so the optimality is still correct because it requires only admissible functions
     """
-    a = sum(dists) / 2
+    a = max(sum(dists) / 2, max(dists))
 
     return a
 
@@ -197,7 +220,17 @@ def blokus_cover_heuristic(state, problem):
     """
     a = max(dists)
 
-    return a
+    """
+    next we added the basic heuristic for targets that are not filled,
+    and in the final heuristic we will take the max between this and the 
+    other on (max(dists))
+    """
+    not_filled = 0
+    for i,j in problem.targets:
+        if state.state[i,j] == -1:
+            not_filled += 1
+
+    return max(a, not_filled)
 
 
 def distance(t1, t2):
@@ -258,38 +291,17 @@ class ClosestLocationSearch:
                 mini = dist
         return mini"""
         max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
-        locations = targets
-        dists = [max_int] * len(locations)
+        points = np.asarray(np.where(state.state != -1))
+        targets = np.array(targets)
+        if points.shape[1] == 0:
+            points = np.array([[self.starting_point[0]], [self.starting_point[1]]])
+        dists = [max_int] * len(targets)
+        for i in range(len(targets)):
+            dist_2 = np.sum([(points[0] - targets[i][0]) ** 2, (points[1] - targets[i][1]) ** 2], axis=0)
+            dists[i] = math.sqrt(np.min(dist_2))
+        idx = np.argmin(dists)
 
-        # if the cover is filled:
-        for i in range(len(locations)):
-            if state.state[locations[i][0], locations[i][1]] != -1:
-                dists[i] = 0
-
-        valid_places_list = []
-        for i in range(0, state.board_w):
-            for j in range(0, state.board_h):
-                if state.state[i, j] != -1:
-                    valid_places_list.append((j, i))
-
-        if not valid_places_list:
-            valid_places_list.append(self.starting_point)
-
-        for place in valid_places_list:
-            for i in range(len(locations)):
-                if distance(place, locations[i]) < dists[i]:
-                    dists[i] = distance(place, locations[i])
-
-        mini = max_int
-        idx = -1
-        for i in range(len(locations)):
-            if dists[i] == 0:
-                continue
-            elif dists[i] < mini:
-                mini = dists[i]
-                idx = i
-
-        return mini, locations[idx]
+        return dists, targets[idx]
 
     def get_successors(self, state):
         """
@@ -298,19 +310,29 @@ class ClosestLocationSearch:
         :return: all the successors
         """
         self.expanded = self.expanded + 1
-        return [(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)]
+        succs = [(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)]
+
+        # we added a little upgrade to the algorithm and we return the successors
+        # sorted by which one is closest to the target. It improves the amount
+        # of expanded nodes and even gives us better solutions.
+        d = {}
+        for succ in succs:
+            d[succ] = self.get_dist_from_targets(succ[0], [self.curr_target])[0][0]
+        d = sorted(d, key=d.get)
+        return d
+        # return sorted([(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)])
 
     def solve(self):
         back = []
         curr_state = self.get_start_state()
         while self.targets:
             print(self.start)
-            dist, targ = self.get_dist_from_targets(curr_state, self.targets)
+            _, targ = self.get_dist_from_targets(curr_state, self.targets)
             self.curr_target = targ
             moves = ucs(self)
             curr_state = self.curr_state_finished_last
             back += moves
-            self.targets.remove(targ)
+            self.targets.remove((targ[0], targ[1]))
         self.curr_state_finished_last = self.board
         return back
 
@@ -320,9 +342,11 @@ class MiniContestSearch:
     Implement your contest entry here
     """
 
-    def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=(0, 0)):
+    def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0), targets=[(0, 0)]):
+        self.board = Board(board_w, board_h, 1, piece_list, starting_point)
+        self.expanded = 0
+        self.starting_point = starting_point
         self.targets = targets.copy()
-        "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
         """
@@ -330,6 +354,33 @@ class MiniContestSearch:
         """
         return self.board
 
+    def get_successors(self, state):
+        """
+        we used the same function as yours
+        :param state: the curr state
+        :return: all the successors
+        """
+        self.expanded = self.expanded + 1
+        succs = [(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)]
+        return succs
+
+    def get_cost_of_actions(self, actions):
+        """
+        the cost of all the actions in a list of actions
+        :param actions: the list of actions
+        :return: the cost
+        """
+        sum = 0
+        for move in actions:
+            sum += move.piece.get_num_tiles()
+        return sum
+
+    def is_goal_state(self, state):
+        for i, j in self.targets:
+            if state.state[i, j] == -1:
+                return False
+        return True
+
     def solve(self):
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return astar(problem=self,heuristic=blokus_cover_heuristic)
