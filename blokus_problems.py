@@ -56,10 +56,10 @@ class BlokusCornersProblem(SearchProblem):
     def __init__(self, board_w, board_h, piece_list, starting_point=(0, 0)):
         self.board = Board(board_w, board_h, 1, piece_list, starting_point)
         self.targets = [(0, 0), (0, board_w - 1), (board_h - 1, 0), (board_h - 1, board_w - 1)]
+        # removing the starting point from the targets
         if starting_point in self.targets:
             self.targets.remove(starting_point)
         self.expanded = 0
-        "*** YOUR CODE HERE ***"
 
     def get_start_state(self):
         """
@@ -68,32 +68,25 @@ class BlokusCornersProblem(SearchProblem):
         return self.board
 
     def is_goal_state(self, state):
-        "*** YOUR CODE HERE ***"
+        # checking if all the targets are filled
         value = all([state.state[loc[0], loc[1]] != -1 for loc in self.targets])
         return value
 
     def get_successors(self, state):
         """
-        state: Search state
-
-        For a given state, this should return a list of triples,
-        (successor, action, stepCost), where 'successor' is a
-        successor to the current state, 'action' is the action
-        required to get there, and 'stepCost' is the incremental
-        cost of expanding to that successor
+        we used the same function as yours
+        :param state: the curr state
+        :return: all the successors
         """
-        # Note that for the search problem, there is only one player - #0
         self.expanded = self.expanded + 1
         return [(state.do_move(0, move), move, move.piece.get_num_tiles()) for move in state.get_legal_moves(0)]
 
     def get_cost_of_actions(self, actions):
         """
-        actions: A list of actions to take
-
-        This method returns the total cost of a particular sequence of actions.  The sequence must
-        be composed of legal moves
+        the cost of all the actions in a list of actions
+        :param actions: the list of actions
+        :return: the cost
         """
-        "*** YOUR CODE HERE ***"
         sum = 0
         for move in actions:
             sum += move.piece.get_num_tiles()
@@ -101,6 +94,13 @@ class BlokusCornersProblem(SearchProblem):
 
 
 def new_min_dists(state, locations, max_int):
+    """
+    finding the min straight-line-distance to each location from the closest filled location
+    :param state: the current state
+    :param locations: the locations to reach
+    :param max_int: the maimum distance possible
+    :return: a list of min distances
+    """
     points = np.asarray(np.where(state.state != -1))
     dists = [max_int] * len(locations)
     for i in range(len(locations)):
@@ -111,22 +111,22 @@ def new_min_dists(state, locations, max_int):
 
 def blokus_corners_heuristic(state, problem):
     """
-    Your heuristic for the BlokusCornersProblem goes here.
-
-    This heuristic must be consistent to ensure correctness.  First, try to come up
-    with an admissible heuristic; almost all admissible heuristics will be consistent
-    as well.
-
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your heuristic is *not* consistent, and probably not admissible!  On the other hand,
-    inadmissible or inconsistent heuristics may find optimal solutions, so be careful.
+    the corners problem heuristic.
+    :param state: the current state
+    :param problem: the problem
+    :return: the heuristic guess
     """
     max_int = state.board_w * state.board_h  # a number that can be used as max int to the distances in the board
     locations = problem.targets
     dists = new_min_dists(state, locations, max_int)
 
+    """
+    the heuristic is to take the sum of minimum distances to the corners
+    and dividing it by two. It is admissible because we can write a proof
+    that at most half of the moves directly to a corner 
+    can get us closer to another 2 corners. so 1/2 * 1/4 + 1/2 *3/4 = 1/2
+    """
     a = sum(dists) / 2
-    # print(a)
 
     return a
 
